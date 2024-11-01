@@ -27,7 +27,7 @@ class Navbar extends Component {
                     selectedList === item ? "nav-link active" : "nav-link"
                   }
                 >
-                  {item.toUpperCase()}
+                  {item.toUpperCase().replace("_", " ")}
                 </span>
               ))}
             </div>

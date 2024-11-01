@@ -3,10 +3,10 @@ import Movie from "./movie";
 
 class Movies extends Component {
   render() {
-    const { movies, selectedList } = this.props;
+    const { movies, title } = this.props;
     return (
       <>
-        <h2>{selectedList.toUpperCase()}</h2>
+        <h2>{title.toUpperCase().replace("_", " ")}</h2>
         <div className="row g-3">
           {movies.map((movie) => (
             <Movie key={movie.id} movie={movie} />

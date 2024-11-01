@@ -1,6 +1,6 @@
 import React, { Component } from "react";
-import api_key from "./utils/api_key";
 
+import axios from "./utils/axios";
 import Navbar from "./components/navbar";
 import Genres from "./components/genres";
 import Movies from "./components/Movies";
@@ -15,63 +15,58 @@ class App extends Component {
     },
     lists: ["trending", "popular", "upcoming", "top_rated", "now_playing"],
     selectedList: "trending",
+    title: "trending",
   };
 
   fetchMovies = async (url, genreId) => {
-    let data = [];
+    let response = {};
     if (genreId) {
-      const response = await fetch(url + "&with_genres=" + genreId);
-      data = await response.json();
-      console.log("ok");
+      response = await axios.get(url + "?with_genres=" + genreId);
     } else {
-      const response = await fetch(url);
-      data = await response.json();
+      response = await axios.get(url);
     }
-    this.setState({ movies: data.results });
+    this.setState({ movies: response.data.results });
   };
 
   fetchGenres = async () => {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/genre/movie/list?api_key=${api_key}`
-    );
-    const data = await response.json();
+    const response = await axios.get(`genre/movie/list`);
 
-    this.setState({ genres: data.genres });
+    this.setState({ genres: response.data.genres });
   };
 
   handleSelectGenre = (genre) => {
-    this.setState({ selectedGenre: genre });
+    this.setState({ selectedGenre: genre, title: genre.name });
   };
 
   handleSelectList = (listName) => {
-    let url = "https://api.themoviedb.org/3/";
+    let url = "";
     if (listName === "trending") {
-      url += `trending/movie/week?api_key=${api_key}`;
+      url += `trending/movie/week`;
     } else {
-      url = `https://api.themoviedb.org/3/movie/${listName}?api_key=${api_key}`;
+      url = `movie/${listName}`;
     }
 
     this.fetchMovies(url);
-    this.setState({ selectedList: listName });
+    this.setState({
+      selectedList: listName,
+      title: listName,
+      selectedGenre: { id: "", name: "Action" },
+    });
   };
 
   componentDidMount() {
-    this.fetchMovies(
-      `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}`
-    );
+    this.fetchMovies(`discover/movie`);
     this.fetchGenres();
   }
 
   componentDidUpdate(prevProps, prevState) {
     if (prevState.selectedGenre !== this.state.selectedGenre)
-      this.fetchMovies(
-        `https://api.themoviedb.org/3/discover/movie?api_key=${api_key}`,
-        this.state.selectedGenre.id
-      );
+      this.fetchMovies(`discover/movie`, this.state.selectedGenre.id);
   }
 
   render() {
-    const { movies, genres, selectedGenre, lists, selectedList } = this.state;
+    const { movies, genres, selectedGenre, lists, selectedList, title } =
+      this.state;
     return (
       <React.Fragment>
         <Navbar
@@ -89,7 +84,7 @@ class App extends Component {
               />
             </aside>
             <section className="col-lg-10">
-              <Movies movies={movies} selectedList={selectedList} />
+              <Movies title={title} movies={movies} />
             </section>
           </div>
         </main>
